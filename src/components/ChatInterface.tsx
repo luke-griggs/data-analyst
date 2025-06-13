@@ -47,6 +47,37 @@ const scrollbarStyles = `
   }
 `;
 
+// Component to display SQL query during execution
+const SqlQueryBox = ({ query }: { query: string }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="max-w-5xl mx-auto px-6 mb-4"
+    >
+      <div className="bg-gray-900 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Executing SQL Query
+            </span>
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            PostgreSQL
+          </div>
+        </div>
+        <div className="p-4">
+          <pre className="text-sm text-gray-800 dark:text-gray-200 font-mono whitespace-pre-wrap overflow-x-auto">
+            {query}
+          </pre>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -143,6 +174,14 @@ export default function ChatInterface() {
         )
       : undefined;
 
+  // Check for active SQL query execution
+  const activeSqlQuery =
+    lastMessage?.role === "assistant" && lastMessage.toolInvocations
+      ? lastMessage.toolInvocations.find(
+          (tool) => tool.toolName === "query_database" && tool.state === "call"
+        )
+      : undefined;
+
   /* --------------------------- helpers ---------------------------- */
   const fillExample = (text: string) => setInput(text);
 
@@ -205,10 +244,19 @@ export default function ChatInterface() {
                 />
               );
             })}
+
+            {/* Show SQL query box when query_database tool is executing */}
+            {activeSqlQuery && (
+              <SqlQueryBox query={activeSqlQuery.args.query} />
+            )}
+
             {isLoading && activeTool?.toolName && (
               <ToolStatus toolName={activeTool.toolName} />
             )}
-            {isLoading && !activeTool && messages.length > 0 && <Thinking />}
+            {isLoading &&
+              !activeTool &&
+              !activeSqlQuery &&
+              messages.length > 0 && <Thinking />}
 
             {/* Scroll target for streaming responses */}
             <motion.div

@@ -38,18 +38,18 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
-/* Wave animation for text */
-@keyframes wave {
+/* Smooth wave animation for text */
+@keyframes smoothWave {
   0%,
-  40%,
   100% {
-    opacity: 0.4;
+    opacity: 0.3;
   }
-  20% {
+  50% {
     opacity: 1;
   }
 }
 
 .wave-text {
-  animation: wave 1.5s ease-in-out infinite;
+  animation: smoothWave 1s ease-in-out infinite;
+  will-change: opacity;
 }

@@ -1,4 +1,3 @@
-import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
 import { convertToCoreMessages, streamText } from "ai";
 import { z } from "zod";
@@ -6,7 +5,6 @@ import { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 import { queryDbTool } from "../tools/dbTool";
 import { chartTool } from "../tools/chartTool";
 import { systemPrompt } from "@/prompts/system";
-import { anthropic, AnthropicProviderOptions } from "@ai-sdk/anthropic";
 import { browseWebTool } from "../tools/browseWeb";
 
 // Allow streaming responses up to 30 seconds
