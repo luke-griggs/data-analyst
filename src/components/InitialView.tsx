@@ -5,42 +5,35 @@ import { ChatInput, ChatInputProps } from "@/components/ChatInput";
 
 interface ExamplePrompts {
   title: string;
-  description: string;
 }
 
 const examplePrompts: ExamplePrompts[] = [
   {
-    title: "Which campaigns had the most conversions in April 2025?",
-    description: "Get a short and quick summary of campaign conversions.",
+    title: "Who are our top 5 highest value customers?",
   },
   {
-    title: "Which campaign subject lines generated the most unique clicks?",
-    description: "Analyze click rates based on subject lines.",
+    title: "What is the total revenue for the month of May?",
   },
   {
-    title: "Why might our best-performing flows be doing well?",
-    description: "Understand the success factors of top flows.",
+    title: "What is the average order value for our top 10% of spenders?",
   },
 ];
 
 function ExampleCard({
   title,
-  description,
   onClick,
 }: {
   title: string;
-  description: string;
   onClick: () => void;
 }) {
   return (
     <div
       onClick={onClick}
-      className="cursor-pointer bg-[var(--input-background)] p-5 rounded-xl hover:bg-muted/20 transition-all duration-200 text-left"
+      className="cursor-pointer bg-transparent border border-border/50 p-4 rounded-lg hover:border-border hover:bg-muted/10 transition-all duration-200 text-left"
     >
-      <h4 className="font-semibold text-sm text-foreground mb-2 leading-tight">
+      <h4 className="font-medium text-sm text-foreground leading-tight">
         {title}
       </h4>
-      <p className="text-xs text-muted leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -61,9 +54,10 @@ export function InitialView({ fillExample, chatInputProps }: InitialViewProps) {
         <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
           Data Analyst
         </h2>
-        <p className="text-lg md:text-xl text-muted mb-8 font-medium">
+        <p className="text-lg md:text-xl text-muted-foreground mb-8 font-normal">
           Designed to help you with{" "}
-          <span className="font-black italic">your data analysis needs</span>.
+          <span className="font-semibold italic">your data analysis needs</span>
+          .
         </p>
 
         {/* Chat Input Container - matching the form padding exactly */}
@@ -82,7 +76,6 @@ export function InitialView({ fillExample, chatInputProps }: InitialViewProps) {
               <ExampleCard
                 key={ex.title}
                 title={ex.title}
-                description={ex.description}
                 onClick={() => fillExample(ex.title)}
               />
             ))}

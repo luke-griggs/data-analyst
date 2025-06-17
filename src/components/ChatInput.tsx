@@ -21,13 +21,16 @@ export interface ChatInputProps {
   ) => void;
   onSubmit: (
     e: React.FormEvent<HTMLFormElement>,
-    attachedFiles?: AttachedFile[]
+    attachedFiles?: AttachedFile[],
+    searchMode?: boolean
   ) => void;
   disabled: boolean;
   chatMode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
   isFixed?: boolean; // New prop for positioning
   onFileAttach: (file: File, fileUrl: string) => void;
+  searchMode?: boolean;
+  onSearchModeChange?: (searchMode: boolean) => void;
 }
 
 export function ChatInput({
@@ -39,12 +42,19 @@ export function ChatInput({
   onModeChange,
   isFixed = true, // Default to true
   onFileAttach,
+  searchMode = false,
+  onSearchModeChange,
 }: ChatInputProps) {
   const [showAttachModal, setShowAttachModal] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
   const toggleMode = () => {
     onModeChange(chatMode === "analysis" ? "audit" : "analysis");
+  };
+
+  const toggleSearchMode = () => {
+    const newSearchMode = !searchMode;
+    onSearchModeChange?.(newSearchMode);
   };
 
   const handleFileAttachInternal = (file: File, fileUrl: string) => {
@@ -143,7 +153,8 @@ export function ChatInput({
       if ((value.trim() || attachedFiles.length > 0) && !disabled) {
         onSubmit(
           e as unknown as React.FormEvent<HTMLFormElement>,
-          attachedFiles
+          attachedFiles,
+          searchMode
         );
         setAttachedFiles([]); // Clear attached files after submit
       }
@@ -155,7 +166,7 @@ export function ChatInput({
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if ((value.trim() || attachedFiles.length > 0) && !disabled) {
-      onSubmit(e, attachedFiles);
+      onSubmit(e, attachedFiles, searchMode);
       setAttachedFiles([]); // Clear attached files after submit
     }
   };
@@ -171,7 +182,7 @@ export function ChatInput({
   return (
     <div className={wrapperClasses}>
       <form onSubmit={handleFormSubmit} className={formClasses}>
-        <div className="w-full bg-[var(--input-background)] rounded-xl shadow-2xl">
+        <div className="w-full bg-input rounded-xl border border-border/50 shadow-sm">
           {/* File attachments preview */}
           {attachedFiles.length > 0 && (
             <div className="px-4 pt-3 pb-2">
@@ -220,33 +231,33 @@ export function ChatInput({
               value={value}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything"
+              placeholder={searchMode ? "Search the web..." : "Ask anything"}
               disabled={disabled}
               rows={1}
-              className={`w-full px-6 bg-transparent outline-none resize-none leading-tight align-middle overflow-hidden text-foreground placeholder-muted ${
+              className={`w-full px-6 bg-transparent outline-none resize-none leading-tight align-middle overflow-hidden text-foreground placeholder-muted-foreground ${
                 isFixed
                   ? "py-5 min-h-[80px] max-h-[200px]"
                   : "py-6 min-h-[80px] max-h-[200px] text-lg"
               }`}
               style={{
                 boxShadow: "none",
-                caretColor: "var(--accent)",
+                caretColor: "#10a37f",
               }}
             />
           </div>
 
           {/* Buttons container - positioned below textarea */}
           <div className="flex items-center justify-between px-4 pb-4">
-            {/* Left side - File upload and Tools buttons */}
+            {/* Left side - File upload and Search buttons */}
             <div className="flex items-center space-x-2">
               <button
                 type="button"
                 onClick={() => setShowAttachModal(true)}
                 disabled={disabled}
-                className={`flex items-center justify-center w-8 h-8 rounded-full shadow-sm transition-colors ${
+                className={`flex items-center justify-center w-8 h-8 rounded-md transition-all ${
                   disabled
-                    ? "bg-muted/20 text-muted/50"
-                    : "bg-muted/20 text-muted hover:bg-muted/30 hover:text-foreground cursor-pointer"
+                    ? "text-muted-foreground/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20 cursor-pointer"
                 }`}
                 title="Attach files"
               >
@@ -267,8 +278,13 @@ export function ChatInput({
 
               <button
                 type="button"
-                className="h-8 px-4 rounded-full text-xs font-medium transition-all duration-200 flex items-center cursor-pointer bg-muted/20 text-muted hover:bg-muted/30 hover:text-foreground"
-                title="Tools"
+                onClick={toggleSearchMode}
+                className={`h-8 px-3 rounded-md text-xs font-medium transition-all duration-200 flex items-center cursor-pointer ${
+                  searchMode
+                    ? "bg-primary/20 text-primary border border-primary/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                }`}
+                title={searchMode ? "Disable web search" : "Enable web search"}
               >
                 <svg
                   className="w-3.5 h-3.5 mr-1.5"
@@ -280,10 +296,10 @@ export function ChatInput({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
-                Tools
+                Search
               </button>
             </div>
 
@@ -291,7 +307,7 @@ export function ChatInput({
             <div className="flex items-center space-x-2">
               <button
                 type="button"
-                className="flex items-center justify-center w-8 h-8 rounded-full shadow-sm transition-colors bg-muted/20 text-muted hover:bg-muted/30 hover:text-foreground cursor-pointer"
+                className="flex items-center justify-center w-8 h-8 rounded-md transition-all text-muted-foreground hover:text-foreground hover:bg-muted/20 cursor-pointer"
                 title="Voice input"
               >
                 <svg
@@ -307,11 +323,11 @@ export function ChatInput({
                 disabled={
                   disabled || (!value.trim() && attachedFiles.length === 0)
                 }
-                className={`flex items-center justify-center w-8 h-8 rounded-full shadow-sm ${
+                className={`flex items-center justify-center w-8 h-8 rounded-md ${
                   disabled || (!value.trim() && attachedFiles.length === 0)
-                    ? "bg-muted/20 text-muted/50"
-                    : "bg-accent text-white hover:bg-accent/90 cursor-pointer hover:scale-105 transition-transform"
-                } transition-colors`}
+                    ? "text-muted-foreground/50 cursor-not-allowed"
+                    : "text-white bg-white/10 hover:bg-white/20 cursor-pointer"
+                } transition-all`}
                 title="Send message"
               >
                 <svg
@@ -344,7 +360,7 @@ export function ChatInput({
 
       {/* Disclaimer message */}
       <div className="text-center mt-1 mb-1">
-        <p className="text-xs font-semibold text-gray-300/50">
+        <p className="text-xs text-muted-foreground/60">
           This model can make mistakes. Check important info.
         </p>
       </div>

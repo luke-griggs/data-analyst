@@ -141,11 +141,11 @@ export const MessageBubble = forwardRef<HTMLDivElement, BubbleProps>(
               return <ChartRenderer key={`chart-${i}`} spec={res.spec} />;
             }
 
-            if (res?.db) {
-              return (
-                <DbTable key={`db-${i}`} results={res.db as DatabaseResult[]} />
-              );
-            }
+            // if (res?.db) {
+            //   return (
+            //     <DbTable key={`db-${i}`} results={res.db as DatabaseResult[]} />
+            //   );
+            // }
             return null;
           })}
         </div>

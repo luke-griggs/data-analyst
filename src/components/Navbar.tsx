@@ -6,7 +6,7 @@ type NavbarProps = Record<string, never>;
 
 export default function Navbar({}: NavbarProps) {
   return (
-    <header className="w-full py-4 bg-navbar-bg text-foreground fixed top-0 left-0 right-0 z-20">
+    <header className="w-full py-4 bg-background border-b border-border/50 text-foreground fixed top-0 left-0 right-0 z-20">
       <div className="flex items-center">
         <div className="flex items-center space-x-6 p-2">
           <Link href="/">

@@ -70,40 +70,46 @@ async function processAttachments(messages: any[]) {
 }
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages, searchMode = false } = await req.json();
 
   try {
     // Process attachments to convert non-images to text
     const processedMessages = await processAttachments(messages);
 
-    const result = streamText({
-      model: google("gemini-2.5-flash-preview-05-20"),
-      messages: convertToCoreMessages(processedMessages, {
+    let result;
+
+    if (searchMode) {
+      // Search mode: only provide web search tool
+      result = streamText({
+        model: google("gemini-2.5-flash-preview-05-20"),
+        messages: convertToCoreMessages(processedMessages),
+        maxSteps: 5,
+        onError: ({ error }: { error: any }) => {
+          console.error("Error during streamText call:", error);
+        },
+        system: systemPrompt,
         tools: {
-          query_database: queryDbTool,
-          render_chart: chartTool,
           browse_web: browseWebTool,
         },
-      }),
+      });
+    } else {
+      // Regular mode: provide database and chart tools
+      result = streamText({
+        model: google("gemini-2.5-flash-preview-05-20"),
+        messages: convertToCoreMessages(processedMessages),
+        maxSteps: 5,
+        onError: ({ error }: { error: any }) => {
+          console.error("Error during streamText call:", error);
+        },
+        system: systemPrompt,
+        tools: {
+          query_database: queryDbTool,
+          render_chart: chartTool,          
+        },
+      });
+    }
 
-      onError: ({ error }) => {
-        console.error("Error during streamText call:", error);
-      },
-      system: systemPrompt,
-      tools: {
-        query_database: queryDbTool,
-        render_chart: chartTool,
-        browse_web: browseWebTool,
-      },
-    });
-
-    const messagesForModel = convertToCoreMessages(processedMessages, {
-      tools: {
-        query_database: queryDbTool,
-        render_chart: chartTool,
-        browse_web: browseWebTool,
-      },
-    });
+    const messagesForModel = convertToCoreMessages(processedMessages);
     console.dir(messagesForModel, { depth: null });
 
     return result.toDataStreamResponse({

@@ -11,8 +11,8 @@ export function getToolResult(part: MessagePart): NormalisedToolResult | null {
     if (part.toolInvocation?.toolName === "render_chart") {
       return { spec: part.toolInvocation.result.spec };
     }
-    if (part.toolInvocation?.toolName === "db") {
-      return { db: part.toolInvocation.args.db };
+    if (part.toolInvocation?.toolName === "query_database") {
+      return { db: part.toolInvocation.result };
     }
   }
 

@@ -81,6 +81,16 @@ Useful for finding recent information on trending topics.`),
     days = 7,
     include_answer = true,
   }) => {
+    // Check if API key is configured
+    if (!process.env.TAVILY_API_KEY) {
+      return {
+        success: false,
+        error:
+          "Tavily API key is not configured. Please set TAVILY_API_KEY in your environment variables. See TAVILY_API_SETUP.md for instructions.",
+        query: query || "",
+      };
+    }
+
     // Validate that query is provided and not empty
     if (!query || query.trim().length === 0) {
       return {

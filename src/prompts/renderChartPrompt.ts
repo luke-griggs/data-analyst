@@ -1,102 +1,143 @@
 export const renderChartPrompt = `
-### Required Structure
-Every valid Vega-Lite specification MUST:
+### Chart Data Format for shadcn/ui
 
-1. Be a top-level JSON object (not wrapped in a "spec" property)
-2. Include at least one of: "mark", "layer", "facet", "hconcat", "vconcat", "concat", or "repeat"
-3. Include a "data" property with the dataset
-4. Include an "encoding" object that maps visual properties to data fields
+IMPORTANT: The ChartRenderer expects data in a specific format for proper rendering with shadcn/ui components.
 
-### Data Types
-Always specify the correct data type in encodings:
-- "nominal" - for categories, names, and discrete values
-- "quantitative" - for numbers and measurements
-- "temporal" - for dates and times (must be in ISO format like "2025-04-01T05:00:00.000Z")
-- "ordinal" - for ordered categories
-
-### Common Charts
-- Bar chart: \`"mark": "bar"\`
-- Line chart: \`"mark": "line"\`
-- Scatter plot: \`"mark": "point"\`
-- Area chart: \`"mark": "area"\`
-- Pie chart: Use \`"mark": "arc"\` with theta encoding
-
-### Example: Bar Chart
-"title": "Campaign Performance",
-"data": {"values": [...]},
-"mark": "bar",
-"encoding": {
-"x": {"field": "campaign_name", "type": "nominal", "axis": {"labelAngle": -45}},
-"y": {"field": "clicks", "type": "quantitative", "axis": {"title": "Clicks"}},
-"tooltip": [
-{"field": "campaign_name", "type": "nominal"},
-{"field": "clicks", "type": "quantitative"}
-]
-},
-"width": 600,
-"height": 400
-}
-
-### Example: Scatter Plot
+### Single Series Data Format
+For charts with one data series (e.g., single bar/line showing one metric):
+\`\`\`json
 {
-"description": "A basic scatter plot example showing the relationship between two variables.",
-  "width": 400,
-  "height": 300,
+  "mark": "bar",
   "data": {
     "values": [
-      {"x": 10, "y": 20, "category": "A", "size": 5},
-      {"x": 15, "y": 35, "category": "A", "size": 8},
-      {"x": 20, "y": 25, "category": "B", "size": 12},
-      {"x": 25, "y": 45, "category": "B", "size": 4},
+      { "month": "January", "value": 186 },
+      { "month": "February", "value": 305 },
+      { "month": "March", "value": 237 }
     ]
   },
-  "mark": "point",
   "encoding": {
-    "x": {
-      "field": "x", 
-      "type": "quantitative",
-      "title": "X-Axis Variable",
-      "scale": {"zero": false}
-    },
-    "y": {
-      "field": "y", 
-      "type": "quantitative",
-      "title": "Y-Axis Variable"
-    },
-    "size": {
-      "field": "size", 
-      "type": "quantitative",
-      "title": "Size Variable"
-    },
-    "color": {
-      "field": "category", 
-      "type": "nominal",
-      "title": "Category"
-    },
-    "tooltip": [
-      {"field": "x", "type": "quantitative"},
-      {"field": "y", "type": "quantitative"},
-      {"field": "category", "type": "nominal"},
-      {"field": "size", "type": "quantitative"}
-    ]
+    "x": { "field": "month", "type": "nominal" },
+    "y": { "field": "value", "type": "quantitative" },
   }
 }
+\`\`\`
+
+**IMPORTANT**: For single-series bar charts, each bar will automatically get a different color (cycling through 5 chart colors). This is perfect for emphasizing different categories or highlighting specific data points.
+
+### Multi-Series Data Format (PREFERRED for comparisons)
+For charts with multiple data series (e.g., comparing desktop vs mobile):
+\`\`\`json
+{
+  "mark": "bar",
+  "title": "User Traffic by Device Type",
+  "description": "Showing total visitors for the last 6 months",
+  "data": {
+    "values": [
+      { "month": "January", "desktop": 186, "mobile": 80 },
+      { "month": "February", "desktop": 305, "mobile": 200 },
+      { "month": "March", "desktop": 237, "mobile": 120 },
+      { "month": "April", "desktop": 73, "mobile": 190 },
+      { "month": "May", "desktop": 209, "mobile": 130 },
+      { "month": "June", "desktop": 214, "mobile": 140 }
+    ]
+  },
+  "encoding": {
+    "x": { "field": "month", "type": "nominal" }
+  }
+}
+\`\`\`
+
+NOTE: For multi-series charts, you only need to specify the x-axis field. The ChartRenderer will automatically detect and render all numeric fields as separate series with proper colors and legends.
+
+### Chart Types
+- Bar chart: \`"mark": "bar"\` - Best for comparing discrete categories. Single-series bar charts automatically use different colors for each bar.
+- Line chart: \`"mark": "line"\` - Best for showing trends over time
+- Area chart: \`"mark": "area"\` - Best for showing cumulative trends
+- Pie chart: \`"mark": "arc"\` or \`"mark": "pie"\` - Best for showing parts of a whole
+
+### Color Usage
+- **Single-series bar charts**: Each bar automatically gets a different color, perfect for highlighting different categories or values
+- **Multi-series charts**: Each series gets its own consistent color across all data points
+- **Pie charts**: Each slice gets a different color automatically
+
+### Best Practices
+1. **Always include title and description** for better context
+2. **Use multi-series format** when comparing multiple metrics
+3. **Keep month names full** (e.g., "January" not "Jan") - the renderer will abbreviate them
+4. **For time-based data**, order chronologically in the data array
+5. **Numeric values** should be actual numbers, not strings
+6. **Use single-series bar charts** when you want to emphasize differences between categories with color
+
+### Example: Single-Series Bar Chart with Automatic Colors
+\`\`\`json
+{
+  "mark": "bar",
+  "title": "Top 5 Sales Representatives",
+  "description": "Revenue generated by each sales rep this quarter",
+  "data": {
+    "values": [
+      { "name": "John Smith", "revenue": 125000 },
+      { "name": "Sarah Johnson", "revenue": 98000 },
+      { "name": "Mike Davis", "revenue": 87000 },
+      { "name": "Emma Wilson", "revenue": 76000 },
+      { "name": "Chris Brown", "revenue": 65000 }
+    ]
+  },
+  "encoding": {
+    "x": { "field": "name", "type": "nominal" },
+    "y": { "field": "revenue", "type": "quantitative" }
+  }
+}
+\`\`\`
+
+### Example: Line Chart with Multiple Series
+\`\`\`json
+{
+  "mark": "line",
+  "title": "Sales Performance",
+  "description": "Monthly sales comparison across regions",
+  "data": {
+    "values": [
+      { "month": "January", "north": 4200, "south": 3100, "east": 2800, "west": 3500 },
+      { "month": "February", "north": 4500, "south": 3300, "east": 3000, "west": 3700 },
+      { "month": "March", "north": 4800, "south": 3500, "east": 3200, "west": 3900 }
+    ]
+  },
+  "encoding": {
+    "x": { "field": "month", "type": "nominal" }
+  }
+}
+\`\`\`
+
+### Example: Pie Chart
+\`\`\`json
+{
+  "mark": "arc",
+  "title": "Market Share",
+  "description": "Q4 2023 Distribution",
+  "data": {
+    "values": [
+      { "category": "Product A", "value": 35 },
+      { "category": "Product B", "value": 28 },
+      { "category": "Product C", "value": 22 },
+      { "category": "Product D", "value": 15 }
+    ]
+  },
+  "encoding": {
+    "theta": { "field": "value", "type": "quantitative" },
+    "color": { "field": "category", "type": "nominal" }
+  }
+}
+\`\`\`
+
+### Common Mistakes to Avoid
+- Don't wrap the specification in a "spec" object
+- Don't specify y-axis encoding for multi-series data (let the renderer handle it)
+- Don't use abbreviated month names in data (use "January" not "Jan")
+- Don't mix different data structures in the same chart
+- Always ensure numeric values are numbers, not strings
 
 
-### Advanced Features
-- For multiple series, use \`"color": {"field": "category"}\`
-- To show uncertainty, add error bands with \`"mark": {"type": "errorband"}\`
-- For small multiples, use \`"facet": {"field": "category"}\`
-
-### Interactive Elements
-- Add zoom: \`"selection": {"zoom": {"type": "interval", "bind": "scales"}}\`
-- Add tooltips: \`"mark": {"type": "point", "tooltip": true}\`
-
-### Common Errors to Avoid
-- do not wrap the specification in a "spec" object
-- Always specify data types in encoding (nominal, quantitative, etc.)
-- Ensure temporal data is properly formatted as ISO date strings
-- For bar charts, use \`"axis": {"labelAngle": -45}\` to prevent label overlap
 - VERY IMPORTANT: think carefully about the chart type and the data you are using to create the chart to best display the data to the end user.
 
-`
+`;
