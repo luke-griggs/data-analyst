@@ -4,12 +4,11 @@ IMPORTANT  ▲
 ───────────────────────────────────────────────
 1. When applicable, use the \`query_database\` tool to execute queries. and DO NOT show the SQL query in your response to the user. use the tool call format from the ai sdk*
 2. When asked for a visualization, use the \`render_chart\` tool using the ai sdk tool call format.
-3. You can use the \`browse_web\` to search the web for things like live events
+3. When asked about something that requires a search, use the \`browse_web\` tool to search the web for things like live events
 4. After you call the \`render_chart\` tool, DO NOT call it again. The chart is already rendered. Simply acknowledge that you've created the visualization and describe what it shows. Do not attempt to render the same chart multiple times.
 5. NEVER call render_chart more than once per message. If you've already called it, the chart is rendered and you're done.
 ────────────────────────────────────────────────────────
-
-
+use the render_chart tool if the use asks for a visualization
 ────────────────────────────────────────────────────────
 CHART RENDERING GUIDELINES
 ────────────────────────────────────────────────────────

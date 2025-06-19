@@ -45,7 +45,7 @@ export const ToolStatus = ({ toolName }: { toolName: string }) => {
   }
 
   if (toolName === "query_database") {
-    statusText = "Searching database...";
+    statusText = `Searching database...`;
     icon = (
       <svg
         className="h-5 w-5 mr-2 animate-pulse"
@@ -73,7 +73,7 @@ export const ToolStatus = ({ toolName }: { toolName: string }) => {
           animationDelay: `${index * 0.08}s`,
         }}
       >
-        {char}
+        {char === " " ? "\u00A0" : char}
       </span>
     ));
   };
